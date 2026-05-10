@@ -37,8 +37,9 @@
       display: flex; align-items: center; justify-content: center;
       flex-direction: column; gap: 1.5rem;
       transition: opacity 0.6s ease;
+      pointer-events: all;
     }
-    #loader.hide { opacity: 0; pointer-events: none; }
+    #loader.hide { opacity: 0; pointer-events: none; display: none; }
     .loader-logo { width: 100px; height: 100px; border-radius: 50%; animation: pulse 1.5s ease-in-out infinite; }
     .loader-bar {
       width: 160px; height: 2px; background: rgba(201,169,110,0.2); border-radius: 2px; overflow: hidden;
@@ -528,12 +529,17 @@
 <script>
 
   // ── LOADER FIX ──────────────────────────────────────────────
+  var _loaderHidden = false;
   function hideLoader() {
+    if (_loaderHidden) return;
+    _loaderHidden = true;
     const loader = document.getElementById('loader');
-    if (loader) {
-      loader.classList.add('hide');
-      setTimeout(() => loader.remove(), 700);
-    }
+    if (!loader) return;
+    loader.style.opacity = '0';
+    loader.style.pointerEvents = 'none';
+    setTimeout(() => {
+      if (loader.parentNode) loader.parentNode.removeChild(loader);
+    }, 700);
   }
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', hideLoader);
@@ -541,6 +547,8 @@
     hideLoader();
   }
   window.addEventListener('load', hideLoader);
+  // Safety fallback — force hide after 2.5s no matter what
+  setTimeout(hideLoader, 2500);
 
   // ── DATA ──────────────────────────────────────────────────────
   const PRODUCTS = [
